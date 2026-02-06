@@ -25,6 +25,7 @@ jobs:
         with:
           version: v1.61
           args: --timeout=5m
+          install-mode: binary
 
   build:
     runs-on: ubuntu-latest
