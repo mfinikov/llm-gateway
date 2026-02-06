@@ -33,11 +33,11 @@ func router(ctx *fasthttp.RequestCtx) {
 func handleHealth(ctx *fasthttp.RequestCtx) {
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
-	ctx.WriteString(`{"status":"healthy"}`)
+	_, _ = ctx.WriteString(`{"status":"healthy"}`)
 }
 
 func handleHome(ctx *fasthttp.RequestCtx) {
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
-	ctx.WriteString(`{"message":"LLM Gateway API","version":"1.0.0"}`)
+	_, _ = ctx.WriteString(`{"message":"LLM Gateway API","version":"1.0.0"}`)
 }

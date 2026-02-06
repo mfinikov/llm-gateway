@@ -19,7 +19,7 @@ type ChatResponse struct {
 }
 
 // HandleChatRequest processes incoming chat requests and routes them to the appropriate model
-// It must be POST "/chat" and it uses
+// It must be POST "/chat" and it uses jsonparser for fast JSON parsing
 func HandleChatRequest(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Path()) != "/chat" {
 		ctx.Error("Not Found", fasthttp.StatusNotFound)
@@ -37,7 +37,7 @@ func HandleChatRequest(ctx *fasthttp.RequestCtx) {
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetContentType("application/json")
-		ctx.WriteString(`{"error":"Missing or invalid model field"}`)
+		_, _ = ctx.WriteString(`{"error":"Missing or invalid model field"}`)
 		return
 	}
 
@@ -45,23 +45,23 @@ func HandleChatRequest(ctx *fasthttp.RequestCtx) {
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetContentType("application/json")
-		ctx.WriteString(`{"error":"Missing or invalid message field"}`)
+		_, _ = ctx.WriteString(`{"error":"Missing or invalid message field"}`)
 		return
 	}
 
 	if model == "" || message == "" {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetContentType("application/json")
-		ctx.WriteString(`{"error":"Model and message fields cannot be empty"}`)
+		_, _ = ctx.WriteString(`{"error":"Model and message are required"}`)
 		return
 	}
 
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 
-	ctx.WriteString(`{"status":"success","reply":"Echo: `)
-	ctx.WriteString(message)
-	ctx.WriteString(`","model":"`)
-	ctx.WriteString(model)
-	ctx.WriteString(`"}`)
+	_, _ = ctx.WriteString(`{"status":"success","reply":"Echo: `)
+	_, _ = ctx.WriteString(message)
+	_, _ = ctx.WriteString(`","model":"`)
+	_, _ = ctx.WriteString(model)
+	_, _ = ctx.WriteString(`"}`)
 }
