@@ -1,6 +1,6 @@
 module github.com/mfinikov/llm-gateway
 
-go 1.25.3
+go 1.23
 
 require github.com/valyala/fasthttp v1.69.0
 
