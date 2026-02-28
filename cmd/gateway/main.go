@@ -2,15 +2,43 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
 
 	"github.com/mfinikov/llm-gateway/internal/http"
 	"github.com/valyala/fasthttp"
 )
 
 func main() {
-	log.Println("Starting Gateway Server on :8080...")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := ":" + port
 
-	if err := fasthttp.ListenAndServe(":8080", router); err != nil {
+	server := &fasthttp.Server{
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		Name:         "llm-gateway",
+	}
+
+	go func() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+		<-sigCh
+
+		log.Println("Shutdown signal received, stopping server...")
+		if err := server.Shutdown(); err != nil {
+			log.Printf("Error during shutdown: %v", err)
+		}
+	}()
+
+	log.Printf("Starting Gateway Server on %s...", addr)
+	if err := server.ListenAndServe(addr); err != nil {
 		log.Fatalf("Error: %s", err)
 	}
 }
@@ -26,7 +54,9 @@ func router(ctx *fasthttp.RequestCtx) {
 	case "/":
 		handleHome(ctx)
 	default:
-		ctx.Error("Not Found", fasthttp.StatusNotFound)
+		ctx.SetContentType("application/json")
+		ctx.SetStatusCode(fasthttp.StatusNotFound)
+		_, _ = ctx.WriteString(`{"error":` + strconv.Quote("Not Found") + `}`)
 	}
 }
 
